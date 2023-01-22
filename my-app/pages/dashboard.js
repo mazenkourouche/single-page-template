@@ -1,20 +1,5 @@
-/*
-  This example requires some changes to your config:
-  
-  ```
-  // tailwind.config.js
-  module.exports = {
-    // ...
-    plugins: [
-      // ...
-      require('@tailwindcss/forms'),
-    ],
-  }
-  ```
-*/
-
 import { React, useState } from "react";
-import Layout from "../components/global/layout";
+import { Layout } from "@components/index";
 import Image from "next/image";
 import Link from "next/link";
 import tools from "../utils/tools";
@@ -69,7 +54,9 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="flex flex-col space-y-1 text-left">
-                <p className="text-black text-sm font-medium">{contentItem}</p>
+                <p className="text-black text-sm font-medium">
+                  {contentItem.title}
+                </p>
                 <p className="text-gray-400 text-xs">
                   {contentItem.description}
                 </p>

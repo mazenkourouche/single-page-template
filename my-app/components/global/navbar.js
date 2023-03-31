@@ -1,208 +1,295 @@
-import { Fragment, useState, useEffect, useRef } from "react";
-import { Popover, Transition } from "@headlessui/react";
-import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import Image from "next/image";
+import { Fragment, useEffect, useRef, useState } from "react";
+import { Dialog, Disclosure, Popover, Transition } from "@headlessui/react";
+import { Bars3Icon, PhoneIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import Link from "next/link";
-import {
-  ShoppingCartIcon,
-  MagnifyingGlassIcon,
-} from "@heroicons/react/24/outline";
-import { useCart } from "react-use-cart";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import Logo from "./logo";
 
-export default function Navbar({ items }) {
-  const initialNavBgColor = "bg-transparent";
-  const scrollNavBgColor = "bg-white";
+function classNames(...classes) {
+  return classes.filter(Boolean).join(" ");
+}
 
-  const [navBg, setNavBg] = useState(initialNavBgColor);
-
-  const [y, setY] = useState(0);
-
-  // Change Nav BG here
-  const navScroll = (e) => {
-    const window = e.currentTarget;
-
-    if (window.innerWidth < 768) {
-      if (window.scrollY > 50) {
-        setNavBg(scrollNavBgColor);
-      } else {
-        setNavBg(initialNavBgColor);
-      }
-      return;
-    }
-
-    const threshold = 1;
-    // scrolling up
-    if (y > window.scrollY) {
-      if (window.scrollY > threshold) {
-        setNavBg(scrollNavBgColor);
-      } else {
-        setNavBg(initialNavBgColor);
-      }
-    }
-
-    // scrolling down
-    else if (y < window.scrollY) {
-      if (window.scrollY > threshold) {
-        setNavBg(scrollNavBgColor);
-      }
-    }
-    setY(window.scrollY);
-  };
-
-  useEffect(() => {
-    setY(window.scrollY);
-    window.addEventListener("scroll", navScroll);
-
-    return () => {
-      window.removeEventListener("scroll", (e) => navScroll(e));
-    };
-  });
+export default function NavigationBar() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    // Change Nav BG here
-    <Popover className={`w-full z-50 fixed ${navBg}`}>
-      <div className="mx-auto px-4 sm:px-6 2xl:px-20 ">
-        <div className="flex items-center justify-between py-6 md:space-x-10 border-b">
-          <Logo />
-
-          <MainNavItems items={items} />
-          <div className="flex space-x-6">
-            <MagnifyingGlassIcon className="w-5 h-5 text-gray-500" />
-            <ShoppingCartButton />
-            <div className="flex space-x-2 md:hidden">
-              <HamburgerMenuButton />
-            </div>
-          </div>
-          <MobileMenuPopover items={items} />
-        </div>
+    <nav
+      className="mx-auto items-center justify-center w-full flex  bg-white  overflow-visible "
+      aria-label="Global"
+    >
+      <div className="max-w-7xl w-full">
+        <MainNav
+          mobileMenuOpen={mobileMenuOpen}
+          setMobileMenuOpen={setMobileMenuOpen}
+        />
       </div>
-    </Popover>
+      <MobileNav
+        mobileMenuOpen={mobileMenuOpen}
+        setMobileMenuOpen={setMobileMenuOpen}
+      />
+    </nav>
   );
 }
 
-const HamburgerMenuButton = () => {
+const MainNav = ({ mobileMenuOpen, setMobileMenuOpen }) => {
   return (
-    <div className="-my-2 -mr-2 ">
-      <Popover.Button className="inline-flex items-center justify-center rounded-md  p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-primary">
-        <span className="sr-only">Open menu</span>
-        <Bars3Icon className="h-6 w-6" aria-hidden="true" />
-      </Popover.Button>
+    <div className="flex w-full justify-between space-x-12 items-center bg-brand-nav py-4 px-4 sm:px-12 ">
+      <Logo />
+      <MainNavigationItems />
+      <div></div>
     </div>
   );
 };
 
-const Logo = () => {
+const MainNavigationItems = () => {
   return (
-    <Link href="/">
-      <div
-        className="h-8 aspect-square sm:h-10 xl:h-14 relative z-30 first-letter 
-      bg-red-300 sm:bg-orange-300 md:bg-gray-300 lg:bg-green-300 xl:bg-purple-300 2xl:bg-blue-300"
-      >
-        <Image
-          src="/images/logo-site.png"
-          alt="Logo"
-          fill
-          style={{ objectFit: "contain" }}
-        />
-      </div>
-    </Link>
-  );
-};
-
-const MainNavItems = ({ items }) => {
-  return (
-    <div className="hidden items-center justify-center md:flex md:flex-1 lg:w-0 space-x-8">
-      {items.map((item, index) => (
-        <a
-          key={index}
-          href={item.link}
-          className="text-md font-medium text-center text-black hover:text-gray-900"
+    <div>
+      <Popover.Group className="hidden lg:flex lg:gap-x-6 z-20">
+        {NAV_ITEMS.map((item, index) => (
+          <MainMenuItem item={item} index={index} key={index} />
+        ))}
+      </Popover.Group>
+      <div className="flex space-x-2 items-center justify-center">
+        <button
+          type="button"
+          className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 lg:hidden "
+          onClick={() => setMobileMenuOpen(true)}
         >
-          {item.title}
-        </a>
-      ))}
+          <span className="sr-only">Open main menu</span>
+          <Bars3Icon className="h-6 w-6 text-slate-800" aria-hidden="true" />
+        </button>
+      </div>
     </div>
   );
 };
 
-const MobileMenuPopover = ({ items }) => {
+const MobileNav = ({ mobileMenuOpen, setMobileMenuOpen }) => {
   return (
-    <Transition
-      as={Fragment}
-      enter="duration-200 ease-out"
-      enterFrom="opacity-0 scale-95"
-      enterTo="opacity-100 scale-100"
-      leave="duration-100 ease-in"
-      leaveFrom="opacity-100 scale-100"
-      leaveTo="opacity-0 scale-95"
+    <Dialog
+      as="div"
+      className="lg:hidden z-100"
+      open={mobileMenuOpen}
+      onClose={setMobileMenuOpen}
     >
-      <Popover.Panel
-        focus
-        className="absolute inset-x-0 top-0 origin-top-right transform p-2 transition md:hidden z-50"
-      >
-        <div className="divide-y-2 divide-gray-50 rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5">
-          <div className="px-5 pt-5 pb-6">
-            <MobileMenuHeader />
-            <MobileMenuItems items={items} />
+      <div className="fixed inset-0 z-100" />
+      <Dialog.Panel className="fixed inset-y-0 right-0 z-100 w-full overflow-y-auto bg-brand-nav px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 bg-slate-50">
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            className="-m-2.5 rounded-md p-2.5 text-gray-400"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <span className="sr-only">Close menu</span>
+            <XMarkIcon className="h-6 w-6 stroke-2" aria-hidden="true" />
+          </button>
+        </div>
+        <div className="mt-6 flow-root">
+          <div className="-my-6 divide-y divide-gray-500/10">
+            <div className="space-y-2 py-6">
+              {NAV_ITEMS.map((item, index) => (
+                <MobileMenuItem
+                  item={item}
+                  index={index}
+                  key={index}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                  }}
+                />
+              ))}
+            </div>
           </div>
         </div>
-      </Popover.Panel>
-    </Transition>
+      </Dialog.Panel>
+    </Dialog>
   );
 };
 
-const MobileMenuHeader = () => {
-  return (
-    <div className="flex items-center justify-between">
-      <Logo />
-      <div className="-mr-2">
-        <Popover.Button className="inline-flex items-center justify-center rounded-md bg-white p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-primary">
-          <span className="sr-only">Close menu</span>
-          <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+function MainMenuItem({ item, index }) {
+  const [isShowing, setIsShowing] = useState(false);
+  const router = useRouter();
+  if (item.subitems) {
+    return (
+      <Popover className="relative z-50 text-gray-600">
+        <Popover.Button
+          as="a"
+          href={item.link}
+          onMouseEnter={() => setIsShowing(true)}
+          onMouseLeave={() => setIsShowing(false)}
+          className="text-md font-bold text-center
+          hover:text-brand-primary flex items-center space-x-2"
+          onClick={() => {
+            router.push(item.link);
+          }}
+        >
+          <p>{item.title}</p>
+          <ChevronDownIcon
+            className="h-5 w-5 flex-none stroke-2"
+            aria-hidden="true"
+          />
         </Popover.Button>
-      </div>
-    </div>
-  );
-};
-
-const MobileMenuItems = ({ items }) => {
-  return (
-    <div className="mt-6">
-      <nav className="grid gap-y-8">
-        {items.map((item, index) => (
-          <Popover.Button as={Link} href={item.link} key={index}>
-            <span className="ml-3 text-base font-medium text-gray-900">
-              {item.title}
-            </span>
-          </Popover.Button>
-        ))}
-      </nav>
-    </div>
-  );
-};
-
-const ShoppingCartButton = () => {
-  const [totalCartItems, setTotalCartItems] = useState(0);
-  const { totalUniqueItems, isEmpty } = useCart();
-
-  useEffect(() => {
-    // Update the document title using the browser API
-    console.log(totalUniqueItems);
-    setTotalCartItems(totalUniqueItems);
-  }, [totalUniqueItems]);
-
-  return (
-    <Link href={"/cart"}>
-      <button
-        type="button"
-        className="inline-flex relative items-center text-sm font-medium text-center text-white focus:ring-4 focus:outline-none focus:ring-blue-300"
+        <Transition
+          enter="transition duration-100 ease-out"
+          enterFrom="transform scale-95 opacity-0"
+          enterTo="transform scale-100 opacity-100"
+          leave="transition duration-75 ease-out"
+          leaveFrom="transform scale-100 opacity-100"
+          leaveTo="transform scale-95 opacity-0"
+          onMouseEnter={() => setIsShowing(true)}
+          onMouseLeave={() => setIsShowing(false)}
+          show={isShowing}
+        >
+          <Popover.Panel className="absolute -left-8 top-full  mt-0 pt-3 w-screen max-w-xs z-20">
+            <div className="grid grid-cols-1 bg-white p-2 rounded-lg shadow-md  ring-1 ring-gray-900/5 text-gray-900">
+              {item.subitems.map((child) => (
+                <Link
+                  href={child.link}
+                  className="text-left font-semibold hover:font-bold p-2 hover:bg-gray-100 rounded-md"
+                >
+                  {child.title}
+                </Link>
+              ))}
+            </div>
+          </Popover.Panel>
+        </Transition>
+      </Popover>
+    );
+  } else {
+    return (
+      <Link
+        key={index}
+        href={item.link ?? ""}
+        className="text-md font-bold text-center text-slate-600
+          hover:text-brand-primary"
       >
-        <ShoppingCartIcon className="w-5 h-5 text-gray-500 " />
-        <span className="sr-only">Notifications</span>
-        <div className="inline-flex absolute -top-1.5 -right-2 justify-center items-center w-4 h-4 text-[8px] text-white bg-black rounded-full">
-          {totalCartItems}
-        </div>
-      </button>
-    </Link>
-  );
-};
+        {item.title}
+      </Link>
+    );
+  }
+}
+
+function MobileMenuItem({ item, index, onClick }) {
+  const [isShowing, setIsShowing] = useState(false);
+
+  const buttonRef = useRef();
+
+  function toggleButton() {
+    onClick();
+  }
+
+  if (item.subitems) {
+    return (
+      <Disclosure as="div" className="-mx-3 text-slate-600">
+        {({ open }) => (
+          <>
+            <Disclosure.Button
+              //   ref={buttonRef}
+              className="  flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base font-semibold leading-7 hover:bg-gray-50/5"
+            >
+              {item.title}
+              <ChevronDownIcon
+                className={classNames(
+                  open ? "rotate-180" : "",
+                  "h-5 w-5 flex-none"
+                )}
+                aria-hidden="true"
+              />
+            </Disclosure.Button>
+            <Disclosure.Panel className="mt-2 space-y-2">
+              {[...item.subitems].map((child) => (
+                <a
+                  key={child.title}
+                  as="button"
+                  href={child.link}
+                  onClick={() => {
+                    toggleButton();
+                  }}
+                  className="block rounded-lg py-2 pl-6 pr-3 text-sm font-semibold leading-7 text-slate-600 hover:bg-gray-50/10"
+                >
+                  {child.title}
+                </a>
+              ))}
+            </Disclosure.Panel>
+          </>
+        )}
+      </Disclosure>
+    );
+  } else {
+    return (
+      <Link
+        key={index}
+        href={item.link ?? ""}
+        className="-mx-3 block rounded-lg py-2 px-3 text-base font-semibold leading-7 text-slate-600"
+        onClick={() => {
+          toggleButton();
+        }}
+      >
+        {item.title}
+      </Link>
+    );
+  }
+}
+
+const NAV_ITEMS = [
+  {
+    title: "Home",
+    link: "/",
+  },
+  {
+    title: "Packages",
+    link: "/packages",
+  },
+  {
+    title: "About",
+    link: "/about-us",
+    subitems: [
+      {
+        title: "Company Profile",
+        link: "/about-us/company-profile",
+      },
+      {
+        title: "Terms and Conditions",
+        link: "/about-us/terms-and-conditions",
+      },
+      {
+        title: "Our Process",
+        link: "/about-us/our-process",
+      },
+    ],
+  },
+  {
+    title: "Projects",
+    link: "/our-projects",
+  },
+  {
+    title: "Services",
+    link: "/our-services",
+    subitems: [
+      {
+        title: "Supply and Installation",
+        link: "/services/supply-and-installation",
+      },
+      {
+        title: "Service and Repairs",
+        link: "/services/services-and-repairs",
+      },
+      {
+        title: "Preventative Maintenance",
+        link: "/services/preventative-maintenance",
+      },
+      {
+        title: "Residential",
+        link: "/services/residential-air-conditioning-sydney",
+      },
+      {
+        title: "Commercial",
+        link: "/services/commercial-air-conditioning-sydney/",
+      },
+    ],
+  },
+  {
+    title: "Contact",
+    link: "/contact-us",
+  },
+];

@@ -1,11 +1,13 @@
 import React from "react";
 
-const SiteContainer = ({ children }) => {
+const Container = ({ children, className }) => {
   return (
-    <main className="mx-auto max-w-7xl px-6 sm:px-6 lg:px-8 sm:pt-24">
+    <div
+      className={`max-w-7xl w-full mx-6 sm:mx-6 lg:mx-16 bg-transparent ${className}`}
+    >
       {children}
-    </main>
+    </div>
   );
 };
 
-export default SiteContainer;
+export default Container;

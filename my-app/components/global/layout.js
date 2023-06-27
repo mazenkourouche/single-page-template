@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Popover, Transition } from "@headlessui/react";
 import {
   ArrowPathIcon,
@@ -18,6 +18,8 @@ import Head from "next/head";
 import NavigationBar from "./navbar";
 import Link from "next/link";
 import Image from "next/image";
+import { geologica } from "@utils/fonts";
+
 const solutions = [
   {
     name: "Analytics",
@@ -93,23 +95,38 @@ export default function Layout({ children, title, canonical, description }) {
   const [showingPullout, setShowingPullout] = useState(true);
 
   return (
-    <div class="flex flex-col h-screen">
-      <Head>
-        <title key="title">{title + " - AirXperts"}</title>
-        <link rel="canonical" href={`https://airxperts.com.au/${canonical}`} />
-        <meta name="description" content={description} />
-        <meta property="og:title" content={title + " - AirXperts"} />
-        <meta property="og:description" content={description} />
-        {/* <SEO /> */}
-      </Head>
-      <header className="relative z-10 ">
+    // <div className="flex flex-col h-screen">
+    //   <Head>
+    //     <title key="title">{title + " - AirXperts"}</title>
+    //     <link rel="canonical" href={`https://airxperts.com.au/${canonical}`} />
+    //     <meta name="description" content={description} />
+    //     <meta property="og:title" content={title + " - AirXperts"} />
+    //     <meta property="og:description" content={description} />
+    //     {/* <SEO /> */}
+    //   </Head>
+    //   <header className="relative z-10 ">
+    //     <NavigationBar />
+    //     {/* Sticky Header and Footer with Tailwind */}
+    //   </header>
+    //   <main className="relative overflow-y-auto">
+    //     <div>{children}</div>
+    //     <Footer />
+    //   </main>
+    // </div>
+    <div
+      className={`flex flex-col min-h-screen bg-white ${geologica.className}`}
+    >
+      {/* <SEO seo={seo} /> */}
+
+      {/* <Banner /> */}
+      <div className=" fixed z-20 w-full">
         <NavigationBar />
-        {/* Sticky Header and Footer with Tailwind */}
-      </header>
-      <main class="relative overflow-y-auto">
-        <div>{children}</div>
+      </div>
+      <div className="flex- mx-auto  text-lg w-full h-full  ">{children}</div>
+      <div>
         <Footer />
-      </main>
+      </div>
+      {/* <WaitlistModal isOpen={isOpen} setIsOpen={setIsOpen} /> */}
     </div>
   );
 }

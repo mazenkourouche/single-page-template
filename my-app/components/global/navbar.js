@@ -1,11 +1,18 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { Dialog, Disclosure, Popover, Transition } from "@headlessui/react";
-import { Bars3Icon, PhoneIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  Bars3Icon,
+  HeartIcon,
+  PhoneIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import Logo from "./logo";
+import { BoltIcon } from "@heroicons/react/24/solid";
+import LogoFull from "./logoFull";
+import BrandButton from "./brandButton";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -13,59 +20,135 @@ function classNames(...classes) {
 
 export default function NavigationBar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const initialNavBgColor = "bg-transparent";
+  const scrollNavBgColor = "bg-white";
+
+  const initialNavTextColor = "text-slate-900";
+  const scrollNavTextColor = "text-slate-800";
+
+  const initialShadow = "shadow-none";
+  const scrollShadow = "shadow-sm";
+
+  const [navBg, setNavBg] = useState(initialNavBgColor);
+  const [navText, setNavText] = useState(initialNavTextColor);
+
+  const [shadow, setShadow] = useState("bemychef-logo");
+
+  const [y, setY] = useState(0);
+
+  // Change Nav BG here
+  const navScroll = (e) => {
+    const window = e.currentTarget;
+
+    if (window.innerWidth < 768) {
+      if (window.scrollY > 50) {
+        setNavBg(scrollNavBgColor);
+        setNavText(scrollNavTextColor);
+        setShadow(scrollShadow);
+      } else {
+        setNavBg(initialNavBgColor);
+        setNavText(initialNavTextColor);
+        setShadow(initialShadow);
+      }
+      return;
+    }
+
+    const threshold = 20;
+    // scrolling up
+    if (y > window.scrollY) {
+      if (window.scrollY > threshold) {
+        setNavBg(scrollNavBgColor);
+        setNavText(scrollNavTextColor);
+        setShadow(scrollShadow);
+      } else {
+        setNavBg(initialNavBgColor);
+        setNavText(initialNavTextColor);
+        ("LOWWWW");
+        setShadow(initialShadow);
+      }
+    }
+
+    // scrolling down
+    else if (y < window.scrollY) {
+      if (window.scrollY > threshold) {
+        setNavBg(scrollNavBgColor);
+        setNavText(scrollNavTextColor);
+
+        setShadow(scrollShadow);
+      }
+    }
+    setY(window.scrollY);
+  };
+
+  useEffect(() => {
+    setY(window.scrollY);
+    console.log("Hellooo");
+    window.addEventListener("scroll", navScroll);
+
+    return () => {
+      window.removeEventListener("scroll", (e) => navScroll(e));
+    };
+  });
 
   return (
-    <nav
-      className="mx-auto items-center justify-center w-full flex  bg-white  overflow-visible "
-      aria-label="Global"
-    >
-      <div className="max-w-7xl w-full">
-        <MainNav
+    <div>
+      <nav
+        className={`mx-auto items-center justify-center w-full flex fixed ${navBg} ${navText} ${shadow} transition-all z-50 duration-300`}
+        aria-label="Global"
+      >
+        {/* <Banner /> */}
+        <div className="max-w-7xl w-full">
+          <MainNav
+            mobileMenuOpen={mobileMenuOpen}
+            setMobileMenuOpen={setMobileMenuOpen}
+            navText={navText}
+          />
+        </div>
+        <MobileNav
           mobileMenuOpen={mobileMenuOpen}
           setMobileMenuOpen={setMobileMenuOpen}
+          navText={navText}
         />
-      </div>
-      <MobileNav
-        mobileMenuOpen={mobileMenuOpen}
-        setMobileMenuOpen={setMobileMenuOpen}
-      />
-    </nav>
+      </nav>
+    </div>
   );
 }
 
-const MainNav = ({ mobileMenuOpen, setMobileMenuOpen }) => {
+const MainNav = ({ mobileMenuOpen, setMobileMenuOpen, logo, navText }) => {
   return (
-    <div className="flex w-full justify-between space-x-12 items-center bg-brand-nav py-4 px-4 sm:px-12 ">
-      <Logo />
+    <div className="flex   w-full justify-between items-center  rounded-full py-4 px-4 sm:px-12 uppercase ">
+      <div className="col-span-1 flex items-center space-x-12">
+        <LogoFull className={"h-12"} />
+      </div>
       <MainNavigationItems />
-      <div></div>
-    </div>
-  );
-};
-
-const MainNavigationItems = () => {
-  return (
-    <div>
-      <Popover.Group className="hidden lg:flex lg:gap-x-6 z-20">
-        {NAV_ITEMS.map((item, index) => (
-          <MainMenuItem item={item} index={index} key={index} />
-        ))}
-      </Popover.Group>
-      <div className="flex space-x-2 items-center justify-center">
+      <BrandButton href={"/"} style={"secondary"}>
+        GET QUOTE
+      </BrandButton>
+      <div className="flex space-x-4 items-center justify-center col-span-1  lg:hidden">
         <button
           type="button"
-          className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 lg:hidden "
+          className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 "
           onClick={() => setMobileMenuOpen(true)}
         >
           <span className="sr-only">Open main menu</span>
-          <Bars3Icon className="h-6 w-6 text-slate-800" aria-hidden="true" />
+          <Bars3Icon className={`h-6 w-6 ${navText}`} aria-hidden="true" />
         </button>
       </div>
     </div>
   );
 };
 
-const MobileNav = ({ mobileMenuOpen, setMobileMenuOpen }) => {
+const MainNavigationItems = () => {
+  return (
+    <Popover.Group className="hidden lg:flex lg:gap-x-12 text-sm z-20">
+      {NAV_ITEMS.map((item, index) => (
+        <MainMenuItem item={item} index={index} key={index} />
+      ))}
+    </Popover.Group>
+  );
+};
+
+const MobileNav = ({ mobileMenuOpen, setMobileMenuOpen, navText }) => {
   return (
     <Dialog
       as="div"
@@ -86,7 +169,7 @@ const MobileNav = ({ mobileMenuOpen, setMobileMenuOpen }) => {
           </button>
         </div>
         <div className="mt-6 flow-root">
-          <div className="-my-6 divide-y divide-gray-500/10">
+          <div className={`-my-6 divide-y divide-gray-500/10 ${navText}`}>
             <div className="space-y-2 py-6">
               {NAV_ITEMS.map((item, index) => (
                 <MobileMenuItem
@@ -118,7 +201,7 @@ function MainMenuItem({ item, index }) {
           onMouseEnter={() => setIsShowing(true)}
           onMouseLeave={() => setIsShowing(false)}
           className="text-md font-bold text-center
-          hover:text-brand-primary flex items-center space-x-2"
+          hover:text-orange-500 flex items-center space-x-2"
           onClick={() => {
             router.push(item.link);
           }}
@@ -142,8 +225,9 @@ function MainMenuItem({ item, index }) {
         >
           <Popover.Panel className="absolute -left-8 top-full  mt-0 pt-3 w-screen max-w-xs z-20">
             <div className="grid grid-cols-1 bg-white p-2 rounded-lg shadow-md  ring-1 ring-gray-900/5 text-gray-900">
-              {item.subitems.map((child) => (
+              {item.subitems.map((child, index) => (
                 <Link
+                  key={index}
                   href={child.link}
                   className="text-left font-semibold hover:font-bold p-2 hover:bg-gray-100 rounded-md"
                 >
@@ -160,10 +244,11 @@ function MainMenuItem({ item, index }) {
       <Link
         key={index}
         href={item.link ?? ""}
-        className="text-md font-bold text-center text-slate-600
-          hover:text-brand-primary"
+        className="text-md  text-center text-brand-navy 
+          hover:text-brand-red transition-all group"
       >
-        {item.title}
+        <p>{item.title}</p>
+        <div className="h-0.5 w-full bg-brand-red duration-300 opacity-0 group-hover:opacity-100 transition-all scale-x-0 group-hover:scale-x-100"></div>
       </Link>
     );
   }
@@ -234,62 +319,18 @@ function MobileMenuItem({ item, index, onClick }) {
 const NAV_ITEMS = [
   {
     title: "Home",
-    link: "/",
-  },
-  {
-    title: "Packages",
-    link: "/packages",
+    link: "/dashboard",
   },
   {
     title: "About",
-    link: "/about-us",
-    subitems: [
-      {
-        title: "Company Profile",
-        link: "/about-us/company-profile",
-      },
-      {
-        title: "Terms and Conditions",
-        link: "/about-us/terms-and-conditions",
-      },
-      {
-        title: "Our Process",
-        link: "/about-us/our-process",
-      },
-    ],
-  },
-  {
-    title: "Projects",
-    link: "/our-projects",
+    link: "/blog",
   },
   {
     title: "Services",
-    link: "/our-services",
-    subitems: [
-      {
-        title: "Supply and Installation",
-        link: "/services/supply-and-installation",
-      },
-      {
-        title: "Service and Repairs",
-        link: "/services/services-and-repairs",
-      },
-      {
-        title: "Preventative Maintenance",
-        link: "/services/preventative-maintenance",
-      },
-      {
-        title: "Residential",
-        link: "/services/residential-air-conditioning-sydney",
-      },
-      {
-        title: "Commercial",
-        link: "/services/commercial-air-conditioning-sydney/",
-      },
-    ],
+    link: "/all-recipes",
   },
   {
-    title: "Contact",
-    link: "/contact-us",
+    title: "Projects",
+    link: "/all-recipes",
   },
 ];

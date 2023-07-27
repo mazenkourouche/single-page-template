@@ -109,3 +109,15 @@ a {
     color-scheme: dark;
   }
 }
+
+button {
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background-color: var(--hover-background-color);
+}
+
+button:active {
+  background-color: var(--active-background-color);
+}
